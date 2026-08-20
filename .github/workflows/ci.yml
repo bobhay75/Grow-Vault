@@ -16,4 +16,12 @@ jobs:
       - name: Validate web manifest JSON
         run: node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8')); console.log('manifest valid')"
       - name: Verify required DOM hooks
-        run: node -e "const h=require('fs').readFileSync('index.html','utf8'); for(const id of ['spendable','vaulted','goal','goalBar','projection','ledger','deposit','rate','trigger','add','spend','reset']) if(!h.includes('id=\"'+id+'\"')) throw new Error('missing #'+id); console.log('DOM hooks valid')"
+        run: |
+          node <<'NODE'
+          const h = require('fs').readFileSync('index.html', 'utf8');
+          const ids = ['spendable','vaulted','goal','goalBar','projection','ledger','deposit','rate','trigger','add','spend','reset'];
+          for (const id of ids) {
+            if (!h.includes(`id="${id}"`)) throw new Error(`missing #${id}`);
+          }
+          console.log('DOM hooks valid');
+          NODE
