@@ -1,0 +1,27 @@
+name: Validate Grow Vault
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check JavaScript syntax
+        run: node --check app.js && node --check sw.js
+      - name: Validate web manifest JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8')); console.log('manifest valid')"
+      - name: Verify required DOM hooks
+        run: |
+          node <<'NODE'
+          const h = require('fs').readFileSync('index.html', 'utf8');
+          const ids = ['spendable','vaulted','goal','goalBar','projection','ledger','deposit','rate','trigger','add','spend','reset'];
+          for (const id of ids) {
+            if (!h.includes(`id="${id}"`)) throw new Error(`missing #${id}`);
+          }
+          console.log('DOM hooks valid');
+          NODE
