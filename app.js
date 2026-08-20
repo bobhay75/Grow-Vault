@@ -3,7 +3,8 @@ const emptyState=()=>({spendable:0,vaulted:0,tx:[]});
 function loadState(){try{const raw=localStorage.getItem('growvault-demo');if(!raw)return emptyState();const parsed=JSON.parse(raw);if(!parsed||!Number.isFinite(+parsed.spendable)||!Number.isFinite(+parsed.vaulted)||!Array.isArray(parsed.tx))return emptyState();return {spendable:+parsed.spendable,vaulted:+parsed.vaulted,tx:parsed.tx}}catch{return emptyState()}}
 let state=loadState();
 const round=n=>Math.round(Number(n)*100)/100;
-const money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(Number(n)||0);\nconst esc=s=>String(s||'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));
+const money=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(Number(n)||0);
+const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function save(){localStorage.setItem('growvault-demo',JSON.stringify(state))}
 function applies(trigger,event){return trigger==='both'||trigger===event}
 function audit(entry){if(entry.type==='Deposit'){const expectedVault=round(entry.gross*entry.rate);const expectedSpend=round(entry.gross-entry.vault);return Math.abs(expectedVault-entry.vault)<0.01&&Math.abs(expectedSpend-entry.spend)<0.01?'VERIFIED':'REVIEW'}if(entry.type==='Purchase'){const expectedVault=round(entry.gross*entry.rate);const expectedOutflow=round(entry.gross+expectedVault);return Math.abs(expectedVault-entry.vault)<0.01&&Math.abs(expectedOutflow-entry.spend)<0.01?'VERIFIED':'REVIEW'}return 'REVIEW'}
