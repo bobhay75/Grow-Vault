@@ -1,5 +1,27 @@
-const CACHE='grow-vault-v5';
-const ASSETS=['./','./index.html','./app.js','./manifest.webmanifest'];
-self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)))});
-self.addEventListener('activate',event=>event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))),self.clients.claim()])));
-self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;event.respondWith((async()=>{try{const response=await fetch(event.request);if(response.ok){const copy=response.clone();event.waitUntil(caches.open(CACHE).then(cache=>cache.put(event.request,copy)).catch(()=>{}))}return response}catch{return (await caches.match(event.request))||(await caches.match('./index.html'))}})())});
+'use strict';
+const PREFIX = 'grow-vault:' + encodeURIComponent(self.registration.scope) + ':';
+const CACHE = PREFIX + 'v6';
+const ASSETS = ['./', './index.html', './engine.js?v=6', './app.js?v=6', './manifest.webmanifest'];
+const URLS = new Set(ASSETS.map(path => new URL(path, self.registration.scope).href));
+self.addEventListener('install', event => {
+  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll([...URLS])).then(() => self.skipWaiting()));
+});
+self.addEventListener('activate', event => {
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key.startsWith(PREFIX) && key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim()));
+});
+self.addEventListener('fetch', event => {
+  // Never intercept another app, external API, or URL with unrelated query data.
+  if (event.request.method !== 'GET' || !URLS.has(event.request.url)) return;
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE);
+    try {
+      const response = await fetch(event.request);
+      if (response.ok && response.type !== 'opaque') event.waitUntil(cache.put(event.request, response.clone()).catch(() => {}));
+      return response;
+    } catch {
+      const cached = await cache.match(event.request);
+      if (cached) return cached;
+      return Response.error();
+    }
+  })());
+});
