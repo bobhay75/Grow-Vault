@@ -1,5 +1,5 @@
 'use strict';
-const PREFIX = 'grow-vault-';
+const PREFIX = 'grow-vault:' + encodeURIComponent(self.registration.scope) + ':';
 const CACHE = PREFIX + 'v6';
 const ASSETS = ['./', './index.html', './engine.js?v=6', './app.js?v=6', './manifest.webmanifest'];
 const URLS = new Set(ASSETS.map(path => new URL(path, self.registration.scope).href));

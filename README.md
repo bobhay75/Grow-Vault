@@ -66,11 +66,11 @@ The ledger now calculates in integer cents and replays saved transactions before
 
 Entries are saved to this browser only. Export makes a JSON copy, including notes. A blocked or full storage area produces an explicit error before balances change. Invalid existing data is preserved and new entries are blocked until it is exported or the user confirms a reset. Changing browsers or clearing site data loses local history unless it was exported. Use one active tab when recording transactions; localStorage does not provide transactional locking across tabs.
 
-The service worker caches only this application's exact static assets and deletes only old `grow-vault-` caches. It never substitutes the app page for API or external requests. The Pages workflow uploads only the five runtime assets, rather than repository reports and tests.
+The service worker caches only this application's exact static assets and deletes only old caches for the exact service-worker registration scope. It never substitutes the app page for API or external requests. The Pages workflow uploads only the five runtime assets, rather than repository reports and tests.
 
 ### Validation recorded 2026-11-23
 
-- All 11 Node regression tests passed, covering cent arithmetic, insufficient funds, hostile/corrupt saved data, balance limits, failed saves, versioned offline asset coverage, and cache isolation.
+- All 12 Node regression tests passed, covering cent arithmetic, insufficient funds, hostile/corrupt saved data, balance limits, failed saves, versioned offline asset coverage, and cache isolation across separate Grow Vault paths.
 - JavaScript syntax and `git diff --check` passed.
 - A local Chromium end-to-end launch was attempted but the execution environment denied its required process socket. Browser/device visual and installation checks remain release checks; they are not claimed as completed.
 - This is a usable simulation prototype. Banking, payments, investment returns, live account connections, and external audit services are not implemented here.
