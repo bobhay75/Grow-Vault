@@ -12,7 +12,9 @@ jobs:
         with:
           node-version: 22
       - name: Check JavaScript syntax
-        run: node --check app.js && node --check sw.js
+        run: node --check engine.js && node --check app.js && node --check sw.js
+      - name: Verify ledger and offline cache isolation
+        run: node --test tests/*.test.cjs
       - name: Validate web manifest JSON
         run: node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8')); console.log('manifest valid')"
       - name: Verify required DOM hooks
